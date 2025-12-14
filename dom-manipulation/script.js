@@ -1,3 +1,4 @@
+function syncQuotes() {}
 // DOM Elements
 // ==========================
 const quoteDisplay = document.getElementById("quoteDisplay");
