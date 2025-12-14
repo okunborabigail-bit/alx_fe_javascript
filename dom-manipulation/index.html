@@ -4,20 +4,36 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dynamic Quote Generator</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    #quoteDisplay p { font-size: 1.2em; font-weight: bold; }
+    #quoteDisplay small { display: block; margin-top: 5px; color: #555; }
+    input, select, button { margin: 5px 0; padding: 5px; }
+    #syncNotification { margin-top: 10px; color: green; font-weight: bold; }
+  </style>
 </head>
 <body>
   <h1>Dynamic Quote Generator</h1>
-  <!-- Quote will appear here -->
+  <!-- Category filter dropdown -->
+  <label for="categoryFilter">Filter by Category:</label>
+  <select id="categoryFilter" onchange="filterQuotes()">
+    <option value="all">All Categories</option>
+    <!-- Categories dynamically populated -->
+  </select>
+  <!-- Display random quote -->
   <div id="quoteDisplay"></div>
-  <!-- Button to show random quote -->
+  <!-- Show new quote button -->
   <button id="newQuote">Show New Quote</button>
-  <!-- Form will be generated dynamically -->
+  <!-- Add quote form container -->
   <div id="formContainer"></div>
-  <!-- Import JSON file -->
+  <!-- JSON import/export -->
   <input type="file" id="importFile" accept=".json" onchange="importFromJsonFile(event)" />
-  <!-- Export JSON button -->
-  <button id=">Export Quotes as JSON</button>
-    <script src="script.js></script>
+  <button id="exportJson">Export Quotes as JSON</button>
+  <!-- Server sync notification -->
+  <div id="syncNotification"></div>
+  <!-- Optional manual sync button -->
+  <button id="manualSync">Sync Now</button>
+  <!-- Link to script.js -->
+  <script src="script.js"></script>
 </body>
 </html>
-
