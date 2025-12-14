@@ -6,6 +6,13 @@ const formContainer = document.getElementById("formContainer");
 const exportBtn = document.getElementById("exportJson");
 const importFile = document.getElementById("importFile");
 const categoryFilter = document.getElementById("categoryFilter");
+const syncNotification = document.getElementById("syncNotification");
+// Optional manual sync button
+const manualSyncBtn = document.getElementById("manualSync");
+// ==========================
+// Server URL (mock API)
+// ==========================
+const SERVER_URL = "https://jsonplaceholder.typicode.com/posts";
 // ==========================
 // Load quotes from localStorage or default
 // ==========================
@@ -14,7 +21,6 @@ let quotes = JSON.parse(localStorage.getItem("quotes")) || [
   { text: "Talk is cheap. Show me the code.", category: "Programming" },
   { text: "Healing is not linear.", category: "Life" }
 ];
-// Save quotes to localStorage
 function saveQuotes() {
   localStorage.setItem("quotes", JSON.stringify(quotes));
 }
@@ -37,10 +43,8 @@ function showRandomQuote() {
   quoteCategory.textContent = `Category: ${randomQuote.category}`;
   quoteDisplay.appendChild(quoteText);
   quoteDisplay.appendChild(quoteCategory);
-  // Save last displayed quote in sessionStorage
   sessionStorage.setItem("lastQuote", JSON.stringify(randomQuote));
 }
-// Connect button
 newQuoteBtn.addEventListener("click", showRandomQuote);
 // ==========================
 // Add Quote Form
@@ -61,7 +65,6 @@ function createAddQuoteForm() {
   formContainer.appendChild(inputCategory);
   formContainer.appendChild(addButton);
 }
-// Call form creator
 createAddQuoteForm();
 // ==========================
 // Add new quote
@@ -75,7 +78,7 @@ function addQuote() {
   }
   quotes.push({ text, category });
   saveQuotes();
-  populateCategories(); // Update category dropdown
+  populateCategories();
   document.getElementById("newQuoteText").value = "";
   document.getElementById("newQuoteCategory").value = "";
   alert("Quote added successfully!");
@@ -84,9 +87,7 @@ function addQuote() {
 // Populate categories
 // ==========================
 function populateCategories() {
-  // Clear existing options except "All"
   categoryFilter.innerHTML = '<option value="all">All Categories</option>';
-  // Unique categories
   const categories = [...new Set(quotes.map(q => q.category))];
   categories.forEach(category => {
     const option = document.createElement("option");
@@ -94,13 +95,11 @@ function populateCategories() {
     option.textContent = category;
     categoryFilter.appendChild(option);
   });
-  // Restore last selected category
   const savedCategory = localStorage.getItem("lastSelectedCategory");
   if (savedCategory && categories.includes(savedCategory)) {
     categoryFilter.value = savedCategory;
   }
 }
-// Call this on page load
 populateCategories();
 // ==========================
 // Filter quotes when category changes
@@ -142,5 +141,34 @@ function importFromJsonFile(event) {
   };
   fileReader.readAsText(event.target.files[0]);
 }
-
- 
+// ==========================
+// Server Sync
+// ==========================
+async function fetchServerQuotes() {
+  try {
+    const response = await fetch(SERVER_URL);
+    const serverData = await response.json();
+    const serverQuotes = serverData.slice(0, 10).map(item => ({
+      text: item.title,
+      category: "Server"
+    }));
+    const mergedQuotes = [...quotes.filter(q => q.category !== "Server"), ...serverQuotes];
+    quotes = mergedQuotes;
+    saveQuotes();
+    populateCategories();
+    syncNotification.textContent = "Quotes synced with server!";
+    setTimeout(() => syncNotification.textContent = "", 3000);
+  } catch (error) {
+    console.error("Error fetching server quotes:", error);
+    syncNotification.textContent = "Failed to sync with server.";
+    setTimeout(() => syncNotification.textContent = "", 3000);
+  }
+}
+// Auto-sync every 60 seconds
+setInterval(fetchServerQuotes, 60000);
+// Initial fetch on page load
+fetchServerQuotes();
+// Manual sync button (optional)
+if (manualSyncBtn) {
+  manualSyncBtn.addEventListener("click", fetchServerQuotes);
+}
