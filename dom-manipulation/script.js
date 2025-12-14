@@ -1,3 +1,4 @@
+// ==========================
 // Connect DOM elements
 // ==========================
 const quoteDisplay = document.getElementById("quoteDisplay");
@@ -162,9 +163,9 @@ async function postQuoteToServer(quote) {
   }
 }
 // ==========================
-// Fetch quotes from server (sync + conflict resolution)
+// Sync quotes from server (periodic + conflict resolution)
 // ==========================
-async function fetchQuotesFromServer() {
+async function syncQuotes() {
   try {
     const response = await fetch(SERVER_URL);
     const serverData = await response.json();
@@ -179,16 +180,16 @@ async function fetchQuotesFromServer() {
     syncNotification.textContent = "Quotes synced with server!";
     setTimeout(() => syncNotification.textContent = "", 3000);
   } catch (error) {
-    console.error("Error fetching server quotes:", error);
+    console.error("Error syncing with server:", error);
     syncNotification.textContent = "Failed to sync with server.";
     setTimeout(() => syncNotification.textContent = "", 3000);
   }
 }
 // Auto-sync every 60 seconds
-setInterval(fetchQuotesFromServer, 60000);
+setInterval(syncQuotes, 60000);
 // Initial fetch on page load
-fetchQuotesFromServer();
+syncQuotes();
 // Manual sync button
 if (manualSyncBtn) {
-  manualSyncBtn.addEventListener("click", fetchQuotesFromServer);
+  manualSyncBtn.addEventListener("click", syncQuotes);
 }
