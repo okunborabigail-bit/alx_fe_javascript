@@ -7,7 +7,6 @@ const exportBtn = document.getElementById("exportJson");
 const importFile = document.getElementById("importFile");
 const categoryFilter = document.getElementById("categoryFilter");
 const syncNotification = document.getElementById("syncNotification");
-// Optional manual sync button
 const manualSyncBtn = document.getElementById("manualSync");
 // ==========================
 // Server URL (mock API)
@@ -76,9 +75,12 @@ function addQuote() {
     alert("Please enter both quote and category.");
     return;
   }
-  quotes.push({ text, category });
+  const newQuote = { text, category };
+  quotes.push(newQuote);
   saveQuotes();
   populateCategories();
+  // Post the new quote to the server
+  postQuoteToServer(newQuote);
   document.getElementById("newQuoteText").value = "";
   document.getElementById("newQuoteCategory").value = "";
   alert("Quote added successfully!");
@@ -142,9 +144,27 @@ function importFromJsonFile(event) {
   fileReader.readAsText(event.target.files[0]);
 }
 // ==========================
-// Server Sync
+// Post quote to server
 // ==========================
-async function fetchServerQuotes() {
+async function postQuoteToServer(quote) {
+  try {
+    const response = await fetch(SERVER_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(quote)
+    });
+    const result = await response.json();
+    console.log("Posted to server:", result);
+  } catch (error) {
+    console.error("Error posting quote:", error);
+    syncNotification.textContent = "Failed to post new quote to server.";
+    setTimeout(() => syncNotification.textContent = "", 3000);
+  }
+}
+// ==========================
+// Server sync / fetch
+// ==========================
+async function syncQuotes() {
   try {
     const response = await fetch(SERVER_URL);
     const serverData = await response.json();
@@ -152,6 +172,7 @@ async function fetchServerQuotes() {
       text: item.title,
       category: "Server"
     }));
+    // Merge server data: server quotes overwrite previous server quotes
     const mergedQuotes = [...quotes.filter(q => q.category !== "Server"), ...serverQuotes];
     quotes = mergedQuotes;
     saveQuotes();
@@ -159,16 +180,16 @@ async function fetchServerQuotes() {
     syncNotification.textContent = "Quotes synced with server!";
     setTimeout(() => syncNotification.textContent = "", 3000);
   } catch (error) {
-    console.error("Error fetching server quotes:", error);
+    console.error("Error syncing with server:", error);
     syncNotification.textContent = "Failed to sync with server.";
     setTimeout(() => syncNotification.textContent = "", 3000);
   }
 }
 // Auto-sync every 60 seconds
-setInterval(fetchServerQuotes, 60000);
+setInterval(syncQuotes, 60000);
 // Initial fetch on page load
-fetchServerQuotes();
-// Manual sync button (optional)
+syncQuotes();
+// Manual sync button
 if (manualSyncBtn) {
-  manualSyncBtn.addEventListener("click", fetchServerQuotes);
+  manualSyncBtn.addEventListener("click", syncQuotes);
 }
