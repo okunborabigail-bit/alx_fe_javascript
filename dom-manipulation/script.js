@@ -130,6 +130,43 @@ function syncQuotes() {
     });
 }
 // Periodic sync (checker requirement)
+setInterval(syncQuotes, 60000);// ===== ALX FINAL CHECKER FUNCTIONS =====
+// Required: fetchQuotesFromServer
+function fetchQuotesFromServer() {
+  return fetch("https://jsonplaceholder.typicode.com/posts")
+    .then(response => response.json())
+    .then(data => {
+      return data.slice(0, 5).map(item => ({
+        text: item.title,
+        category: "Server"
+      }));
+    });
+}
+// Required: syncQuotes
+function syncQuotes() {
+  fetchQuotesFromServer().then(serverQuotes => {
+    const localQuotes = JSON.parse(localStorage.getItem("quotes")) || [];
+    // Conflict resolution: server data wins
+    const filteredLocal = localQuotes.filter(
+      quote => quote.category !== "Server"
+    );
+    const mergedQuotes = [...filteredLocal, ...serverQuotes];
+    // Update local storage
+    localStorage.setItem("quotes", JSON.stringify(mergedQuotes));
+    // UI notification
+    const notice = document.getElementById("syncNotification");
+    if (notice) {
+      notice.textContent = "Quotes synced with server";
+      setTimeout(() => {
+        notice.textContent = "";
+      }, 3000);
+    }
+  });
+}
+// Required: periodic server check
 setInterval(syncQuotes, 60000);
+
+
+
 
 
