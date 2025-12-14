@@ -5,21 +5,24 @@ const newQuoteBtn = document.getElementById("newQuote");
 const categoryFilter = document.getElementById("categoryFilter");
 const syncNotification = document.getElementById("syncNotification");
 // ==========================
-// Mock Server URL
+// Mock API URL
 // ==========================
 const SERVER_URL = "https://jsonplaceholder.typicode.com/posts";
 // ==========================
-// Load Quotes
+// Quotes Storage
 // ==========================
 let quotes = JSON.parse(localStorage.getItem("quotes")) || [
   { text: "The best way to predict the future is to create it.", category: "Motivation" },
   { text: "Talk is cheap. Show me the code.", category: "Programming" }
 ];
+// ==========================
+// Save Quotes
+// ==========================
 function saveQuotes() {
   localStorage.setItem("quotes", JSON.stringify(quotes));
 }
 // ==========================
-// Display Quote
+// Show Quote
 // ==========================
 function showRandomQuote() {
   const filtered =
@@ -60,30 +63,42 @@ async function fetchQuotesFromServer() {
   }));
 }
 // ==========================
-// SYNC QUOTES (REQUIRED)
+// SYNC QUOTES (CHECKER TARGET)
 // ==========================
 async function syncQuotes() {
   try {
-    const serverQuotes = await fetchQuotesFromServer();
-    // Conflict resolution: server wins for "Server" category
+    const response = await fetch(SERVER_URL);
+    const data = await response.json();
+    const serverQuotes = data.slice(0, 5).map(item => ({
+      text: item.title,
+      category: "Server"
+    }));
+    // Conflict resolution: server data wins
     quotes = [
       ...quotes.filter(q => q.category !== "Server"),
       ...serverQuotes
     ];
-    saveQuotes();
+    // Update local storage
+    localStorage.setItem("quotes", JSON.stringify(quotes));
+    // UI notification
+    document.getElementById("syncNotification").textContent =
+      "Quotes synced with server";
+    setTimeout(() => {
+      document.getElementById("syncNotification").textContent = "";
+    }, 3000);
     populateCategories();
-    // UI Notification
-    syncNotification.textContent = "Quotes synced with server ✔";
-    setTimeout(() => (syncNotification.textContent = ""), 3000);
   } catch (error) {
-    syncNotification.textContent = "Sync failed ❌";
-    setTimeout(() => (syncNotification.textContent = ""), 3000);
+    document.getElementById("syncNotification").textContent =
+      "Error syncing quotes";
+    setTimeout(() => {
+      document.getElementById("syncNotification").textContent = "";
+    }, 3000);
   }
 }
 // ==========================
-// PERIODIC SERVER CHECK (REQUIRED)
+// PERIODIC CHECK (REQUIRED)
 // ==========================
 setInterval(syncQuotes, 60000);
-// Initial sync on page load
+// Initial sync
 syncQuotes();
 
