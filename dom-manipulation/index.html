@@ -8,17 +8,12 @@
 
   <h1>Dynamic Quote Generator</h1>
 
-  <!-- Quote input -->
   <input type="text" id="quoteInput" placeholder="Enter a quote">
-
-  <!-- Category input -->
   <input type="text" id="categoryInput" placeholder="Enter category">
-
   <button id="addQuoteBtn">Add Quote</button>
 
   <br><br>
 
-  <!-- Category filter -->
   <label for="categoryFilter">Filter by category:</label>
   <select id="categoryFilter">
     <option value="all">All Categories</option>
@@ -26,7 +21,7 @@
 
   <br><br>
 
-  <button id="showQuoteBtn">Show Random Quote</button>
+  <button id="showQuoteBtn">Show Quote</button>
   <p id="quoteDisplay"></p>
 
   <br>
@@ -37,7 +32,11 @@
 
   <input type="file" id="importFile" accept=".json">
 
+  <br><br>
+
+  <button id="syncBtn">Sync with Server</button>
+  <p id="syncStatus"></p>
+
   <script src="script.js"></script>
 </body>
 </html>
-
