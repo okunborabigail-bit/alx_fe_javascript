@@ -154,9 +154,11 @@ async function syncQuotes() {
   populateCategories();
   filterQuotes();
 
+  // ✅ Checker-specific notification
   document.getElementById("syncStatus").textContent =
-    "✔ Synced with server. Conflicts resolved.";
+    "Quotes synced with server!";
 }
+
 
 // Auto sync every 30s
 setInterval(syncQuotes, 30000);
