@@ -4,43 +4,22 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dynamic Quote Generator</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    #notification { display: none; background-color: yellow; padding: 5px; margin-bottom: 10px; }
-    #quoteDisplay div { margin: 5px 0; }
-    input { margin: 5px; }
-    button { margin: 5px; }
-  </style>
 </head>
 <body>
   <h1>Dynamic Quote Generator</h1>
-  <!-- Notification -->
-  <div id="notification"></div>
-  <!-- Quote display -->
+
+  <!-- Quote output -->
   <div id="quoteDisplay"></div>
-  <!-- Buttons -->
-  <button id="newQuote">Show New Quote</button>
-  <button id="syncButton">Sync Now</button>
-  <!-- JSON Import/Export -->
-  <div>
-    <button onclick="exportToJson()">Export Quotes</button>
-    <input type="file" id="importFile" accept=".json" onchange="importFromJsonFile(event)">
-  </div>
-  <!-- Add new quote -->
-  <div>
-    <input id="newQuoteText" type="text" placeholder="Enter a new quote" />
-    <input id="newQuoteCategory" type="text" placeholder="Enter quote category" />
-    <button id="addQuoteButton">Add Quote</button>
-  </div>
+
   <!-- Category filter -->
-  <div>
-    <label for="categoryFilter">Filter by category:</label>
-    <select id="categoryFilter" onchange="filterQuotes()">
-      <option value="all">All Categories</option>
-    </select>
-  </div>
-  <!-- Link to script.js -->
+  <div id="categoryContainer"></div>
+
+  <!-- Button to show new quote -->
+  <button id="newQuote">Show New Quote</button>
+
+  <!-- Form will be generated dynamically -->
+  <div id="formContainer"></div>
+
   <script src="script.js"></script>
 </body>
 </html>
-
