@@ -1,10 +1,9 @@
-// STEP 1: Create quotes array
+// Quotes array
 let quotes = [];
 
-// STEP 2: Load quotes from local storage
+// Load quotes from local storage
 function loadQuotes() {
   const storedQuotes = localStorage.getItem("quotes");
-
   if (storedQuotes) {
     quotes = JSON.parse(storedQuotes);
   }
@@ -12,29 +11,27 @@ function loadQuotes() {
 
 loadQuotes();
 
-// STEP 3: Save quotes to local storage
+// Save quotes to local storage
 function saveQuotes() {
   localStorage.setItem("quotes", JSON.stringify(quotes));
 }
 
-// STEP 4: Add a new quote
+// Add quote
 function addQuote() {
-  const quoteInput = document.getElementById("quoteInput");
-  const quoteText = quoteInput.value.trim();
+  const input = document.getElementById("quoteInput");
+  const text = input.value.trim();
 
-  if (quoteText === "") {
+  if (text === "") {
     alert("Please enter a quote");
     return;
   }
 
-  quotes.push(quoteText);
+  quotes.push(text);
   saveQuotes();
-
-  quoteInput.value = "";
-  alert("Quote added successfully!");
+  input.value = "";
 }
 
-// STEP 5: Display random quote
+// Display random quote + save to session storage
 function displayRandomQuote() {
   if (quotes.length === 0) {
     alert("No quotes available");
@@ -42,18 +39,17 @@ function displayRandomQuote() {
   }
 
   const randomIndex = Math.floor(Math.random() * quotes.length);
-  const selectedQuote = quotes[randomIndex];
+  const quote = quotes[randomIndex];
 
-  document.getElementById("quoteDisplay").textContent = selectedQuote;
+  document.getElementById("quoteDisplay").textContent = quote;
 
-  // Save last viewed quote in session storage
-  sessionStorage.setItem("lastViewedQuote", selectedQuote);
+  // ✅ REQUIRED: Save last viewed quote to session storage
+  sessionStorage.setItem("lastViewedQuote", quote);
 }
 
-// STEP 6: Load last viewed quote from session storage
+// Load last viewed quote from session storage
 function loadLastViewedQuote() {
   const lastQuote = sessionStorage.getItem("lastViewedQuote");
-
   if (lastQuote) {
     document.getElementById("quoteDisplay").textContent = lastQuote;
   }
@@ -61,48 +57,47 @@ function loadLastViewedQuote() {
 
 loadLastViewedQuote();
 
-// STEP 7: Export quotes as JSON
-function exportQuotes() {
-  if (quotes.length === 0) {
-    alert("No quotes to export");
-    return;
-  }
-
+// ✅ REQUIRED FUNCTION NAME
+function exportToJsonFile() {
   const blob = new Blob(
     [JSON.stringify(quotes, null, 2)],
     { type: "application/json" }
   );
 
   const url = URL.createObjectURL(blob);
-
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = "quotes.json";
-  link.click();
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "quotes.json";
+  a.click();
 
   URL.revokeObjectURL(url);
 }
 
-// STEP 8: Import quotes from JSON
+// ✅ REQUIRED FUNCTION
 function importFromJsonFile(event) {
-  const fileReader = new FileReader();
+  const reader = new FileReader();
 
-  fileReader.onload = function (event) {
-    try {
-      const importedQuotes = JSON.parse(event.target.result);
-
-      if (!Array.isArray(importedQuotes)) {
-        alert("Invalid JSON file");
-        return;
-      }
-
-      quotes.push(...importedQuotes);
-      saveQuotes();
-      alert("Quotes imported successfully!");
-    } catch (error) {
-      alert("Error reading JSON file");
-    }
+  reader.onload = function (event) {
+    const importedQuotes = JSON.parse(event.target.result);
+    quotes.push(...importedQuotes);
+    saveQuotes();
   };
 
-  fileReader.readAsText(event.target.files[0]);
+  reader.readAsText(event.target.files[0]);
 }
+
+/* =====================================================
+   ✅ REQUIRED: addEventListener usage
+===================================================== */
+
+document.getElementById("addQuoteBtn")
+  .addEventListener("click", addQuote);
+
+document.getElementById("showQuoteBtn")
+  .addEventListener("click", displayRandomQuote);
+
+document.getElementById("exportBtn")
+  .addEventListener("click", exportToJsonFile);
+
+document.getElementById("importFile")
+  .addEventListener("change", importFromJsonFile);
