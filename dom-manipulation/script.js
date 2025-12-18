@@ -6,9 +6,7 @@ let quotes = [];
 
 function loadQuotes() {
   const stored = localStorage.getItem("quotes");
-  if (stored) {
-    quotes = JSON.parse(stored);
-  }
+  if (stored) quotes = JSON.parse(stored);
 }
 
 function saveQuotes() {
@@ -34,6 +32,9 @@ function addQuote() {
   saveQuotes();
   populateCategories();
   filterQuotes();
+
+  // POST new quote to mock server
+  postQuoteToServer({ text, category });
 
   document.getElementById("quoteInput").value = "";
   document.getElementById("categoryInput").value = "";
@@ -88,16 +89,12 @@ function filterQuotes() {
 
 function restoreFilter() {
   const saved = localStorage.getItem("selectedCategory");
-  if (saved) {
-    document.getElementById("categoryFilter").value = saved;
-  }
+  if (saved) document.getElementById("categoryFilter").value = saved;
 }
 
 function restoreLastQuote() {
   const last = sessionStorage.getItem("lastViewedQuote");
-  if (last) {
-    document.getElementById("quoteDisplay").textContent = last;
-  }
+  if (last) document.getElementById("quoteDisplay").textContent = last;
 }
 
 /* =====================
@@ -105,11 +102,7 @@ function restoreLastQuote() {
 ===================== */
 
 function exportToJsonFile() {
-  const blob = new Blob(
-    [JSON.stringify(quotes, null, 2)],
-    { type: "application/json" }
-  );
-
+  const blob = new Blob([JSON.stringify(quotes, null, 2)], { type: "application/json" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
@@ -131,23 +124,29 @@ function importFromJsonFile(event) {
 }
 
 /* =====================
-   SERVER SYNC (SIMULATION)
+   SERVER SYNC
 ===================== */
 
-async function fetchServerQuotes() {
-  const res = await fetch(
-    "https://jsonplaceholder.typicode.com/posts?_limit=5"
-  );
+// FETCH quotes from mock server
+async function fetchQuotesFromServer() {
+  const res = await fetch("https://jsonplaceholder.typicode.com/posts?_limit=5");
   const data = await res.json();
 
-  return data.map(post => ({
-    text: post.title,
-    category: "server"
-  }));
+  return data.map(post => ({ text: post.title, category: "server" }));
 }
 
-async function syncWithServer() {
-  const serverQuotes = await fetchServerQuotes();
+// POST new quote to mock server
+async function postQuoteToServer(quote) {
+  await fetch("https://jsonplaceholder.typicode.com/posts", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(quote)
+  });
+}
+
+// SYNC quotes
+async function syncQuotes() {
+  const serverQuotes = await fetchQuotesFromServer();
 
   // Conflict resolution: server wins
   quotes = serverQuotes;
@@ -159,30 +158,19 @@ async function syncWithServer() {
     "✔ Synced with server. Conflicts resolved.";
 }
 
-// Auto sync every 30 seconds
-setInterval(syncWithServer, 30000);
+// Auto sync every 30s
+setInterval(syncQuotes, 30000);
 
 /* =====================
    EVENTS
 ===================== */
 
-document.getElementById("addQuoteBtn")
-  .addEventListener("click", addQuote);
-
-document.getElementById("showQuoteBtn")
-  .addEventListener("click", filterQuotes);
-
-document.getElementById("exportBtn")
-  .addEventListener("click", exportToJsonFile);
-
-document.getElementById("importFile")
-  .addEventListener("change", importFromJsonFile);
-
-document.getElementById("categoryFilter")
-  .addEventListener("change", filterQuotes);
-
-document.getElementById("syncBtn")
-  .addEventListener("click", syncWithServer);
+document.getElementById("addQuoteBtn").addEventListener("click", addQuote);
+document.getElementById("showQuoteBtn").addEventListener("click", filterQuotes);
+document.getElementById("exportBtn").addEventListener("click", exportToJsonFile);
+document.getElementById("importFile").addEventListener("change", importFromJsonFile);
+document.getElementById("categoryFilter").addEventListener("change", filterQuotes);
+document.getElementById("syncBtn").addEventListener("click", syncQuotes);
 
 /* =====================
    INIT
